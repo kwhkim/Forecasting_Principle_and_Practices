@@ -1,0 +1,48 @@
+
+6.4/ Compare this decomposition with the STL decomposition shown in Figure 6.1 and the classical decomposition shown in Figure 6.8.
+
+```{r}
+fit <- stl(elecequip, s.window=7, t.window=13, robust=TRUE)
+fig_stl <- autoplot(fit) + xlab("Year") +
+  ggtitle("STL decomposition
+    of electrical equipment index")
+
+fig_classic <- elecequip %>% decompose(type="multiplicative") %>%
+  autoplot() + xlab("Year") +
+  ggtitle("Classical multiplicative decomposition
+    of electrical equipment index")
+
+library(cowplot)
+plot_grid(fig_classic, fig_stl)
+```
+
+```{r}
+library(seasonal)
+elecequip %>% seas(x11="") -> fit
+fig_x11 <- autoplot(fit) +
+  ggtitle("X11 decomposition of electrical equipment index")
+
+plot_grid(fig_classic, fig_x11, fig_x11, fig_stl, align = 'hv')
+```
+
+6.4/ The X11 trend-cycle has captured the sudden fall in the data in early 2009 better than either of the other two methods, and the unusual observation at the end of 2009 is now more clearly seen in the remainder component.
+
+
+6.4/ Compare X11 and SEATS(**S**easonal **E**xtraction in **A**RIMA **T**ime **S**eries) composition
+
+```{r}
+fit_SEATS = elecequip %>% seas()
+fit_X11 = elecequip %>% seas(x11 = "")
+
+df_SEATS_remains = fit_SEATS %>% remainder %>% data.frame(Y=as.matrix(.), date=time(.))
+df_X11_remains = fit_X11 %>% remainder %>% data.frame(Y=as.matrix(.), date=time(.))
+
+ggplot() + 
+  geom_point(data=df_SEATS_remains, aes(x=as.vector(date), y=Y)) + 
+  geom_line(data=df_SEATS_remains, aes(x=as.vector(date), y=Y)) + 
+  geom_point(data=df_X11_remains, aes(x=as.vector(date), y=Y, col='red')) +
+  geom_line(data=df_X11_remains, aes(x=as.vector(date), y=Y, col='red'))
+  
+```
+
+
